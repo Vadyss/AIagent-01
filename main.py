@@ -40,4 +40,12 @@ agent = create_tool_calling_agent(
 
 agent_executor = AgentExecutor(agent=agent, tools=[], verbose=True)
 raw_response = agent_executor.invoke({"query": "What is most common threat for apis when they talk from one docker to another", "name": "Alice"})
-print(raw_response)
+
+output = raw_response.get("output")
+if isinstance(output, list):
+    output = "".join(block.get("text", "") for block in output)
+
+try:
+    structured_response = parser.parse(output)
+except Exception as e:
+    print("Error parsing response,", e, "Raw Response - ", raw_response)
