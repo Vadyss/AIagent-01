@@ -5,6 +5,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 
+from tools import search_tool, wiki_tool, save_tool
+
 load_dotenv()
 
 class ResearchResponse(BaseModel):
@@ -32,14 +34,16 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(format_instructions=parser.get_format_instructions())
 
+tools = [search_tool, wiki_tool, save_tool]
 agent = create_tool_calling_agent(
     llm=llm,
     prompt=prompt,
-    tools=[]
+    tools=tools
 )
 
-agent_executor = AgentExecutor(agent=agent, tools=[], verbose=True)
-raw_response = agent_executor.invoke({"query": "What is most common threat for apis when they talk from one docker to another", "name": "Alice"})
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+query = input("What do you want to help with cyber?")
+raw_response = agent_executor.invoke({"query": query})
 
 output = raw_response.get("output")
 if isinstance(output, list):
@@ -47,5 +51,6 @@ if isinstance(output, list):
 
 try:
     structured_response = parser.parse(output)
+    print(structured_response)
 except Exception as e:
     print("Error parsing response,", e, "Raw Response - ", raw_response)
