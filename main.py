@@ -7,3 +7,4 @@ from langchain_core.output_parsers import PydanticOutputParser
 load_dotenv()
 
 llm = ChatOpenAI(model="o4-mini")
+
